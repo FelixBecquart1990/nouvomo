@@ -4,12 +4,12 @@ import 'firebase/auth'
 
 // firebase init
 const config = {
-    apiKey: "AIzaSyAXpshTRhotw_y1zucOj9mUq1qvg90q_1g",
-    authDomain: "nouvomo.firebaseapp.com",
-    databaseURL: "https://nouvomo.firebaseio.com",
-    projectId: "nouvomo",
-    storageBucket: "nouvomo.appspot.com",
-    messagingSenderId: "701748038915"
+    apiKey: "",
+    authDomain: "",
+    databaseURL: "",
+    projectId: "",
+    storageBucket: "",
+    messagingSenderId: ""
 }
 firebase.initializeApp(config)
 
