@@ -1,26 +1,5 @@
 export default {
   state: [
-    /*{
-      context: "local activity ha s dslkdjf kdfj dkfj kjdf dkldfj df l",
-      word: "Attractions",
-      userUid: "userUid",
-      wordId: "oqdsfsdfi",
-      icon: "leaf"
-    },
-    {
-      context: "restaurant activity ha s dslkdj",
-      word: "Dining",
-      userUid: "otheruserUid",
-      wordId: "aersdfsdfoi",
-      icon: "nouvomo"
-    },
-    {
-      context: "school activity ha s dslkdj",
-      word: "Education",
-      userUid: "otheruserUid",
-      wordId: "aeyyfddoi",
-      icon: "leaf"
-    }*/
     {
       word: "business model",
       definition: "Manière dont une entreprise extrait un profit de ses revenus",
@@ -52,7 +31,9 @@ export default {
         { translation: "jeune entreprise", source: "termium" },
       ]
     }
-  ],
+  ]
+
+  ,
   mutations: {
     SET_ADD_NEW_WORD(state, payload) {
       state.push({

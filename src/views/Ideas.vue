@@ -3,8 +3,8 @@
   <toolbar/>
   <v-container v-if="ideas" fill-height fluid style="border-bottom:solid 1px rgba(0,0,0,0.07); background-color:white; min-height:100px">
       <v-layout column align-center justify-center>
-        <v-flex>
-          <h2  class="secondary--text" style="font-weight:normal;">Ajoutez vos idées pour améliorer <span class="primary--text">nouvomo</span></h2>
+        <v-flex style="width:100%;">
+          <h2 class="secondary--text" style="font-weight:normal;text-align:center" :class="{'text-xs-left':$vuetify.breakpoint.xsOnly}">Ajoutez vos idées pour améliorer <span class="primary--text">nouvomo</span></h2>
         </v-flex>
         <v-flex style="width:100%;">
           <h3 class="secondary--text" style="font-weight:normal;text-align:center" :class="{'text-xs-left':$vuetify.breakpoint.xsOnly}">Votez aussi pour ou contre les autres idées</h3>
@@ -24,7 +24,7 @@
     </div>
     </v-container>
 <transition name="bounce">
-    <v-container v-if="ideas.length != 0" fluid style="padding:8px">
+    <v-container fluid style="padding:8px">
         <v-layout align-center justify-center>
         <v-card class="table">
           
@@ -54,7 +54,7 @@
             <v-list-tile v-for="(idea, index) in ideas" :key="index" @click="" v-if="!hasBeenReportedByUser(index)">
                 <div style="display:flex;flex-direction:column;" class="mr-4" @click="toggleVote(index, idea)">
                   <v-icon :class="{'primary--text':containUserUpvote(index)}" style="transform:rotate(90deg);margin-bottom:-10px">arrow_back_ios</v-icon>
-                  <span class="secondary--text" style="width:50px;text-align:center">{{ idea.upvotes.length - idea.downvotes.length}}</span>
+                  <span class="secondary--text" style="width:50px;text-align:center">{{ idea.votesSum }}</span>
                   <v-icon :class="{'primary--text':containUserDownvote(index)}" style="transform:rotate(-90deg);margin-top:-10px">arrow_back_ios</v-icon>
                 </div>
               <v-list-tile-content style="max-width:calc(90vw - 180px)" @click="openModal(idea)">
@@ -129,13 +129,13 @@ export default {
   },
   created() {
     self = this;
-    fb.ideasCollection.orderBy("createdOn", "desc").onSnapshot(
+    fb.ideasCollection.orderBy("votesSum", "desc").onSnapshot(
       snapshot => {
         let listIdeas = [];
         snapshot.forEach(idea => {
           listIdeas.push(Object.assign({ ideaUid: idea.id }, idea.data()));
         });
-        self.ideas = listIdeas
+        self.ideas = listIdeas;
       },
       error => {
         console.log(error);
@@ -177,6 +177,7 @@ export default {
             upvotes: [this.user.currentUser.uid],
             downvotes: [],
             reported: [],
+            votesSum: 1,
             userUid: this.user.currentUser.uid,
             developed: false,
             inDevelopment: false,
@@ -185,7 +186,10 @@ export default {
           .catch(err => {
             console.log(err);
           });
-        this.$store.commit("SET_SNACKBAR", "Félicitation, votre idée vient d'être ajoutée");
+        this.$store.commit(
+          "SET_SNACKBAR",
+          "Félicitation, votre idée vient d'être ajoutée"
+        );
         this.newIdea = "";
       }
     },
@@ -203,12 +207,11 @@ export default {
           1
         );
         this.ideas[index].downvotes.push(this.user.currentUser.uid);
-        fb.ideasCollection
-          .doc(idea.ideaUid)
-          .update({
-            upvotes: this.ideas[index].upvotes,
-            downvotes: this.ideas[index].downvotes
-          });
+        fb.ideasCollection.doc(idea.ideaUid).update({
+          upvotes: this.ideas[index].upvotes,
+          downvotes: this.ideas[index].downvotes,
+          votesSum: this.ideas[index].votesSum - 2
+        });
       } else if (
         this.ideas[index].downvotes.indexOf(this.user.currentUser.uid) > -1
       ) {
@@ -216,14 +219,16 @@ export default {
           this.ideas[index].downvotes.indexOf(this.user.currentUser.uid),
           1
         );
-        fb.ideasCollection
-          .doc(idea.ideaUid)
-          .update({ downvotes: this.ideas[index].downvotes });
+        fb.ideasCollection.doc(idea.ideaUid).update({
+          downvotes: this.ideas[index].downvotes,
+          votesSum: this.ideas[index].votesSum + 1
+        });
       } else {
         this.ideas[index].upvotes.push(this.user.currentUser.uid);
-        fb.ideasCollection
-          .doc(idea.ideaUid)
-          .update({ upvotes: this.ideas[index].upvotes });
+        fb.ideasCollection.doc(idea.ideaUid).update({
+          upvotes: this.ideas[index].upvotes,
+          votesSum: this.ideas[index].votesSum + 1
+        });
       }
     }
   }

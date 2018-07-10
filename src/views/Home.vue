@@ -157,6 +157,7 @@
 
 <script>
 import { mapState } from "vuex";
+const fb = require("../firebaseConfig.js");
 
 export default {
   name: "Home",
@@ -168,15 +169,32 @@ export default {
       context: "",
       newWord: "",
       newContext: "",
-      modalAddWord: false
+      modalAddWord: false,
+      //words: []
     };
   },
+  /*created() {
+    self = this;
+    fb.wordsCollection.onSnapshot(
+      snapshot => {
+        let listWords = [];
+        snapshot.forEach(word => {
+          listWords.push(Object.assign({ wordUid: word.id }, word.data()));
+        });
+        self.words = listWords;
+        console.log(listWords);
+      },
+      error => {
+        console.log(error);
+      }
+    );
+  },*/
   components: {
     Snackbar: () => import("@/components/Snackbar"),
     Toolbar: () => import("@/components/Toolbar")
   },
   computed: {
-    ...mapState(["words", "user"]),
+    ...mapState(["user", "words"]),
     /*user(){
       console.log(this.$store.state.user)
       return this.$store.state.user
@@ -209,15 +227,19 @@ export default {
       return this.filteredWords[index][type];
     },
     addNewWord() {
+      //fb.wordsCollection.doc(word.wordUid)
       if (this.newWord) {
-        this.$store.commit("SET_ADD_NEW_WORD", {
-          word: this.newWord,
-          context: this.newContext,
-          learners: [this.user.currentUser.uid],
-          knowers: [],
-          skippers: [],
-          userUid: this.user.currentUser.uid
-        });
+        fb.wordsCollection
+          .add({
+            word: this.newWord,
+            context: this.newContext,
+            userUid: this.user.currentUser.uid,
+            reported: [],
+            createdOn: new Date()
+          })
+          .catch(err => {
+            console.log(err);
+          });
         this.$store.commit(
           "SET_SNACKBAR",
           "Félicitation, votre nouvomo vient d'être ajouté"
@@ -232,13 +254,12 @@ export default {
 </script>
 
 <style scoped>
-.termium{
+.termium {
   background-image: url("../assets/leaf.png");
   background-size: 18px 18px;
 }
-.nouvomo{
+.nouvomo {
   background-image: url("../assets/nouvomo.png");
   background-size: 18px 18px;
 }
-
 </style>
